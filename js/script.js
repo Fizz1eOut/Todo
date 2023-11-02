@@ -18,10 +18,11 @@ function toggleEmpty(visible) {
   }
 }
 
-function createCheckbox() {
+function createCheckbox(checked = false) {
   const checkBox = document.createElement('input');
   checkBox.type = 'checkbox';
   checkBox.name = 'todo-list__checkbox';
+  checkBox.checked = checked;
   return checkBox;
 }
 
@@ -58,13 +59,13 @@ function removeTodo(id) {
   localStorage.setItem('todo', JSON.stringify(todos));
 }
 
-function updateTodo(todoObj, check) {
+function updateTodo(data) {
   const todos = getTodo();
-  const index = todos.findIndex((todo) => todo.id === todoObj.id);
+  const index = todos.findIndex((todo) => todo.id === data.id);
   console.log(index);
   const obj = todos[index];
   console.log(obj);
-  obj.checkbox = check;
+  obj.checkbox = data.checkbox;
 
   localStorage.setItem('todo', JSON.stringify(todos));
 }
@@ -77,22 +78,24 @@ function saveTodo(todoObj) {
   localStorage.setItem('todo', JSON.stringify(todos));
 }
 
-function removeItem(id) {
-  const todo = todoListItem?.querySelector(`[data-id="${id}"]`);
-  console.log(todo);
-  const wrapper = todo?.closest('.todo-list__content');
-  console.log(wrapper);
-  wrapper?.remove();
-  removeTodo(id);
-}
+// function removeItem(id) {
+//   const todo = todoListItem?.querySelector(`[data-id="${id}"]`);
+//   console.log(todo);
+//   const wrapper = todo?.closest('.todo-list__content');
+//   console.log(wrapper);
+//   wrapper?.remove();
+//   removeTodo(id);
+// }
 
 function createRemoveButton(wrapper) {
   const remove = document.createElement('button');
   remove.type = 'button';
   remove.textContent = 'Удалить';
+  const { id } = wrapper.dataset;
+  console.log(id);
   remove.addEventListener('click', () => {
     wrapper.remove();
-    removeItem();
+    removeTodo(+id);
 
     const todos = document.querySelectorAll('.todo-list__content');
     if (todos.length <= 0) {
@@ -102,20 +105,19 @@ function createRemoveButton(wrapper) {
   return remove;
 }
 
-function createTodo(text) { // text = обычная строка ""
-  const content = createText(text);
+function createTodo(data) { // text = обычная строка ""
+  const content = createText(data.text);
   const wrapper = createWrapper();
   const removeButton = createRemoveButton(wrapper);
-  const checkbox = createCheckbox();
+  const checkbox = createCheckbox(data.checkbox);
   const itemRow = createItem();
   const { id } = wrapper.dataset;
   const obj = {
-    id: +id, text, checkbox: false,
+    id: +id, text: data.text, checkbox: false,
   };
-  saveTodo(obj);
 
   checkbox.addEventListener('change', (e) => {
-    updateTodo(obj, check);
+    updateTodo({ ...obj, checkbox: e.checked });
     content.classList.toggle('todo-list__item--done', e.checked);
   });
 
@@ -126,12 +128,13 @@ function createTodo(text) { // text = обычная строка ""
   todoListItem.prepend(wrapper);
 
   toggleEmpty(false);
+  return obj;
 }
 
 const loadTodo = () => {
   const load = getTodo();
   load.forEach((el) => {
-    createTodo(el.text, el.checkbox);
+    createTodo({ text: el.text, checkbox: el.checkbox });
   });
 };
 loadTodo();
@@ -141,8 +144,9 @@ document.addEventListener('click', (e) => {
     if (!input.value.trim()) {
       return;
     }
-    createTodo(input.value); // передаем текст
+    const todo = createTodo({ text: input.value }); // передаем текст
     input.value = '';
+    saveTodo(todo);
   }
 });
 
@@ -152,7 +156,8 @@ document.addEventListener('keydown', (e) => {
   }
 
   if (e.key === 'Enter') {
-    createTodo(input.value);
+    const todo = createTodo({ text: input.value });
     input.value = '';
+    saveTodo(todo);
   }
 });
