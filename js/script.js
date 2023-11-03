@@ -21,7 +21,7 @@ function toggleEmpty(visible) {
 function createCheckbox(checked = false) {
   const checkBox = document.createElement('input');
   checkBox.type = 'checkbox';
-  checkBox.name = 'todo-list__checkbox';
+  checkBox.className = 'todo-list__checkbox';
   checkBox.checked = checked;
   return checkBox;
 }
@@ -51,10 +51,28 @@ function getTodo() {
   }
 }
 
+const updateLikeButtons = (todoObj) => {
+  const todoList = document.querySelectorAll('.todo-list__content');
+  console.log(todoList);
+  const todos = getTodo();
+  console.log(todos);
+  const result = [...todoList].filter((el) => {
+    const { id } = el.dataset;
+    console.log(id);
+    return todos.some((todo) => todo.id === todoObj.id);
+  });
+  result.forEach((el) => {
+    el.addEventListener('click', () => {
+      document.querySelector('.todo-list__row span').classList.add('todo-list__item--done');
+    });
+  });
+  console.log(result);
+};
+
 function removeTodo(id) {
   const todos = getTodo();
   const index = todos.findIndex((todo) => todo.id === id);
-  console.log(index);
+  // console.log(index);
   todos.splice(index, 1);
   localStorage.setItem('todo', JSON.stringify(todos));
 }
@@ -62,9 +80,9 @@ function removeTodo(id) {
 function updateTodo(data) {
   const todos = getTodo();
   const index = todos.findIndex((todo) => todo.id === data.id);
-  console.log(index);
+  // console.log(index);
   const obj = todos[index];
-  console.log(obj);
+  // console.log(obj);
   obj.checkbox = data.checkbox;
 
   localStorage.setItem('todo', JSON.stringify(todos));
@@ -78,21 +96,12 @@ function saveTodo(todoObj) {
   localStorage.setItem('todo', JSON.stringify(todos));
 }
 
-// function removeItem(id) {
-//   const todo = todoListItem?.querySelector(`[data-id="${id}"]`);
-//   console.log(todo);
-//   const wrapper = todo?.closest('.todo-list__content');
-//   console.log(wrapper);
-//   wrapper?.remove();
-//   removeTodo(id);
-// }
-
 function createRemoveButton(wrapper) {
   const remove = document.createElement('button');
   remove.type = 'button';
   remove.textContent = 'Удалить';
   const { id } = wrapper.dataset;
-  console.log(id);
+  // console.log(id);
   remove.addEventListener('click', () => {
     wrapper.remove();
     removeTodo(+id);
@@ -115,10 +124,10 @@ function createTodo(data) { // text = обычная строка ""
   const obj = {
     id: +id, text: data.text, checkbox: false,
   };
-
   checkbox.addEventListener('change', (e) => {
-    updateTodo({ ...obj, checkbox: e.checked });
+    updateTodo({ ...obj, checkbox: e.target.checked });
     content.classList.toggle('todo-list__item--done', e.checked);
+    updateLikeButtons(obj);
   });
 
   wrapper.append(itemRow);
