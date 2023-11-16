@@ -3,12 +3,16 @@ const todoListItem = document.querySelector('.todo-list__item');
 const input = document.getElementById('input');
 let randomId = 0;
 
-function createText(text) {
+function createText(text, checked = false) {
   const content = document.createElement('span');
   content.textContent = text;
+  // content.checked = checked;
+  console.log(checked);
+  if (checked) {
+    content.classList.add('todo-list__item--done');
+  }
   return content;
 }
-
 function toggleEmpty(visible) {
   const empty = document.querySelector('.todo-list__empty');
   if (visible) {
@@ -50,24 +54,6 @@ function getTodo() {
     return [];
   }
 }
-
-const updateLikeButtons = (todoObj) => {
-  const todoList = document.querySelectorAll('.todo-list__content');
-  console.log(todoList);
-  const todos = getTodo();
-  console.log(todos);
-  const result = [...todoList].filter((el) => {
-    const { id } = el.dataset;
-    console.log(id);
-    return todos.some((todo) => todo.id === todoObj.id);
-  });
-  result.forEach((el) => {
-    el.addEventListener('click', () => {
-      document.querySelector('.todo-list__row span').classList.add('todo-list__item--done');
-    });
-  });
-  console.log(result);
-};
 
 function removeTodo(id) {
   const todos = getTodo();
@@ -115,7 +101,7 @@ function createRemoveButton(wrapper) {
 }
 
 function createTodo(data) { // text = обычная строка ""
-  const content = createText(data.text);
+  const content = createText(data.text, data.checkbox);
   const wrapper = createWrapper();
   const removeButton = createRemoveButton(wrapper);
   const checkbox = createCheckbox(data.checkbox);
@@ -127,7 +113,6 @@ function createTodo(data) { // text = обычная строка ""
   checkbox.addEventListener('change', (e) => {
     updateTodo({ ...obj, checkbox: e.target.checked });
     content.classList.toggle('todo-list__item--done', e.checked);
-    updateLikeButtons(obj);
   });
 
   wrapper.append(itemRow);
