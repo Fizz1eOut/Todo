@@ -1,16 +1,35 @@
 // Список дел
 const todoListItem = document.querySelector('.todo-list__item');
 const input = document.getElementById('input');
-let randomId = 0;
+
+function getTodo() {
+  try {
+    const todoRaw = localStorage.getItem('todo');
+    const todo = JSON.parse(todoRaw);
+    return Array.isArray(todo) ? todo : [];
+  } catch {
+    console.warn('error while getting todo from LS');
+    return [];
+  }
+}
+
+function getLatestId() {
+  const todos = getTodo();
+  const ids = todos.map((todo) => todo.id);
+  // console.log(ids);
+  const maxCount = Math.max(...ids);
+  // console.log(maxCount);
+  return Number.isFinite(maxCount) ? maxCount : 0;
+}
+let randomId = getLatestId();
 
 function createText(text, checked = false) {
   const content = document.createElement('span');
   content.textContent = text;
-  // content.checked = checked;
-  console.log(checked);
   if (checked) {
     content.classList.add('todo-list__item--done');
   }
+  // content.classList.toggle('todo-list__item--done', checked);
   return content;
 }
 function toggleEmpty(visible) {
@@ -42,17 +61,6 @@ function createItem() {
   const item = document.createElement('div');
   item.className = 'todo-list__row';
   return item;
-}
-
-function getTodo() {
-  try {
-    const todoRaw = localStorage.getItem('todo');
-    const todo = JSON.parse(todoRaw);
-    return Array.isArray(todo) ? todo : [];
-  } catch {
-    console.warn('error while getting todo from LS');
-    return [];
-  }
 }
 
 function removeTodo(id) {
@@ -110,6 +118,7 @@ function createTodo(data) { // text = обычная строка ""
   const obj = {
     id: +id, text: data.text, checkbox: false,
   };
+  getLatestId();
   checkbox.addEventListener('change', (e) => {
     updateTodo({ ...obj, checkbox: e.target.checked });
     content.classList.toggle('todo-list__item--done', e.checked);
