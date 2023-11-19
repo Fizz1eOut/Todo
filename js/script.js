@@ -19,7 +19,7 @@ function getLatestId() {
   // console.log(ids);
   const maxCount = Math.max(...ids);
   // console.log(maxCount);
-  return Number.isFinite(maxCount) ? maxCount : 0;
+  return Number.isFinite(maxCount) ? maxCount + 1 : 0;
 }
 let randomId = getLatestId();
 
@@ -49,11 +49,11 @@ function createCheckbox(checked = false) {
   return checkBox;
 }
 
-function createWrapper() {
+function createWrapper(id) {
   const div = document.createElement('div');
   div.className = 'todo-list__content';
   div.style.color = '#000000';
-  div.setAttribute('data-id', randomId++);
+  div.setAttribute('data-id', id);
   return div;
 }
 
@@ -109,16 +109,17 @@ function createRemoveButton(wrapper) {
 }
 
 function createTodo(data) { // text = обычная строка ""
+  const id = data.id ?? randomId++;
   const content = createText(data.text, data.checkbox);
-  const wrapper = createWrapper();
+  const wrapper = createWrapper(id);
   const removeButton = createRemoveButton(wrapper);
   const checkbox = createCheckbox(data.checkbox);
   const itemRow = createItem();
-  const { id } = wrapper.dataset;
+
   const obj = {
     id: +id, text: data.text, checkbox: false,
   };
-  getLatestId();
+
   checkbox.addEventListener('change', (e) => {
     updateTodo({ ...obj, checkbox: e.target.checked });
     content.classList.toggle('todo-list__item--done', e.checked);
@@ -136,9 +137,7 @@ function createTodo(data) { // text = обычная строка ""
 
 const loadTodo = () => {
   const load = getTodo();
-  load.forEach((el) => {
-    createTodo({ text: el.text, checkbox: el.checkbox });
-  });
+  load.forEach((el) => createTodo(el));
 };
 loadTodo();
 
